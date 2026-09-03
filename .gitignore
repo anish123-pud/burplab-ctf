@@ -36,3 +36,7 @@ htmlcov/
 .idea/
 .vscode/
 .DS_Store
+
+# Local testing artifacts
+cookies.txt
+chaincookies.txt
