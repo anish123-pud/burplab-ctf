@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product["name"] }} — BurpLab CTF{% endblock %}
+
+{% block content %}
+    <a class="back-link" href="{{ url_for('main.products') }}">← Back to products</a>
+    <div class="product-detail">
+        <section class="panel product-detail__copy">
+            <p class="page-kicker">Product {{ "%02d"|format(product["id"]) }}</p>
+            <h1>{{ product["name"] }}</h1>
+            <p>{{ product["description"] }}</p>
+        </section>
+        <aside class="panel" aria-label="Product details">
+            <div class="panel__header"><h2>Record details</h2></div>
+            <dl class="data-list">
+                <div>
+                    <dt>Price</dt>
+                    <dd>${{ "%.2f"|format(product["price"]) }}</dd>
+                </div>
+                <div>
+                    <dt>In stock</dt>
+                    <dd>{{ product["stock"] }}</dd>
+                </div>
+            </dl>
+        </aside>
+    </div>
+{% endblock %}

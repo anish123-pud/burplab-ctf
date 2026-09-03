@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Lab Reset — BurpLab CTF{% endblock %}
+
+{% block content %}
+    <a class="back-link" href="{{ url_for('admin.dashboard') }}">← Cancel and return to admin</a>
+    <section class="panel danger-zone">
+        <p class="page-kicker">Destructive instructor action</p>
+        <h1>Confirm Lab Reset</h1>
+        <p>
+            This permanently restores users, products, orders, sessions, challenge
+            progress, completions, and all other lab data to the fictional seed state.
+        </p>
+        <p class="inline-alert">All currently logged-in users, including you, will be logged out.</p>
+
+        {% if error %}
+            <p class="inline-alert" role="alert">{{ error }}</p>
+        {% endif %}
+
+        <form class="form-grid" method="post" action="{{ url_for('admin.reset') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="field">
+                <label for="confirmation">Type RESET to confirm</label>
+                <input id="confirmation" name="confirmation" type="text" pattern="RESET" autocomplete="off" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit">Reset lab data</button>
+                <a class="button button--secondary" href="{{ url_for('admin.dashboard') }}">Cancel</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

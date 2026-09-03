@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — BurpLab CTF{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        <div>
+            <p class="page-kicker">Training overview</p>
+            <h1>Welcome, {{ username }}</h1>
+            <p>Monitor your lab progress and continue your next investigation.</p>
+        </div>
+        <a class="button" href="{{ url_for('main.challenges') }}">Continue challenges <span aria-hidden="true">→</span></a>
+    </header>
+
+    <section class="stats-grid" aria-label="Progress summary">
+        <article class="stat-card">
+            <span class="stat-card__label">Completed</span>
+            <strong class="stat-card__value">{{ completed }} / {{ total }}</strong>
+            <span class="stat-card__note">Challenges solved</span>
+            <progress value="{{ completed }}" max="{{ total if total else 1 }}">{{ completed }} / {{ total }}</progress>
+        </article>
+        <article class="stat-card">
+            <span class="stat-card__label">Current score</span>
+            <strong class="stat-card__value">{{ score }}</strong>
+            <span class="stat-card__note">Points earned</span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-card__label">Lab status</span>
+            <strong class="stat-card__value" style="color: var(--success)">Ready</strong>
+            <span class="stat-card__note">Proxy target available</span>
+        </article>
+    </section>
+
+    <div class="dashboard-grid">
+        <section class="panel" id="challenges">
+            <div class="panel__header">
+                <h2>Challenge Progress</h2>
+                <span class="badge{% if completed == total and total %} badge--success{% else %} badge--warning{% endif %}">
+                    {% if completed == total and total %}Complete{% else %}In progress{% endif %}
+                </span>
+            </div>
+            <p class="text-muted">{{ completed }} / {{ total }} completed</p>
+            <p>Score: <span class="score-value">{{ score }} points</span></p>
+            <a href="{{ url_for('main.challenges') }}">View challenges →</a>
+        </section>
+
+        <section class="panel" id="scoreboard">
+            <div class="panel__header">
+                <h2>Scoreboard</h2>
+                <span class="badge">Live ranking</span>
+            </div>
+            <p class="text-muted">Compare your progress with other student accounts.</p>
+            <a href="{{ url_for('main.scoreboard') }}">View scoreboard →</a>
+        </section>
+    </div>
+
+    <section class="panel" style="margin-top: 1rem" aria-labelledby="quick-links-heading">
+        <div class="panel__header">
+            <h2 id="quick-links-heading">Quick access</h2>
+        </div>
+        <div class="quick-links">
+            <a class="quick-link" href="{{ url_for('main.products') }}">Products<span>Inspect the fictional catalog</span></a>
+            <a class="quick-link" href="{{ url_for('main.orders') }}">Orders<span>Review your order history</span></a>
+            <a class="quick-link" href="{{ url_for('main.profile') }}">Profile<span>Manage account details</span></a>
+            <a class="quick-link" href="{{ url_for('main.scoreboard') }}">Scoreboard<span>Check student rankings</span></a>
+        </div>
+    </section>
+
+    <script src="{{ url_for('static', filename='js/dashboard-activity.js') }}" defer></script>
+{% endblock %}

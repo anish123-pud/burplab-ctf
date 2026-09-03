@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0B1120">
+    <title>{% block title %}BurpLab CTF{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <input class="sidebar-toggle" id="sidebar-toggle" type="checkbox" aria-label="Toggle navigation">
+
+    <aside class="sidebar" aria-label="Primary sidebar">
+        <div class="sidebar__header">
+            <a class="brand" href="{{ url_for('main.index') }}">
+                <span class="brand__mark" aria-hidden="true">&gt;_</span>
+                <span>
+                    <strong>BurpLab CTF</strong>
+                    <small>Security training lab</small>
+                </span>
+            </a>
+            <label class="sidebar__close" for="sidebar-toggle" aria-label="Close navigation">×</label>
+        </div>
+
+        <div class="lab-status">
+            <span class="lab-status__dot" aria-hidden="true"></span>
+            <span>Local lab online</span>
+        </div>
+
+        <nav class="sidebar__nav" aria-label="Main navigation">
+            {% if nav_user %}
+                <a class="nav-link{% if request.endpoint == 'main.dashboard' %} is-active{% endif %}" href="{{ url_for('main.dashboard') }}"{% if request.endpoint == 'main.dashboard' %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">⌂</span> Dashboard
+                </a>
+                <a class="nav-link{% if request.endpoint in ('main.products', 'main.product') %} is-active{% endif %}" href="{{ url_for('main.products') }}"{% if request.endpoint in ('main.products', 'main.product') %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">◫</span> Products
+                </a>
+                <a class="nav-link{% if request.endpoint == 'main.orders' %} is-active{% endif %}" href="{{ url_for('main.orders') }}"{% if request.endpoint == 'main.orders' %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">≡</span> Orders
+                </a>
+                <a class="nav-link{% if request.endpoint == 'main.profile' %} is-active{% endif %}" href="{{ url_for('main.profile') }}"{% if request.endpoint == 'main.profile' %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">○</span> Profile
+                </a>
+                <a class="nav-link{% if request.endpoint in ('main.challenges', 'main.challenge', 'main.submit_challenge', 'main.reveal_challenge_hint') %} is-active{% endif %}" href="{{ url_for('main.challenges') }}"{% if request.endpoint in ('main.challenges', 'main.challenge', 'main.submit_challenge', 'main.reveal_challenge_hint') %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">◇</span> Challenges
+                </a>
+                <a class="nav-link{% if request.endpoint == 'main.scoreboard' %} is-active{% endif %}" href="{{ url_for('main.scoreboard') }}"{% if request.endpoint == 'main.scoreboard' %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">⌁</span> Scoreboard
+                </a>
+                {% if nav_user["role"] == "admin" %}
+                    <a class="nav-link{% if request.endpoint and request.endpoint.startswith('admin.') %} is-active{% endif %}" href="{{ url_for('admin.dashboard') }}"{% if request.endpoint and request.endpoint.startswith('admin.') %} aria-current="page"{% endif %}>
+                        <span aria-hidden="true">⚙</span> Admin
+                    </a>
+                {% endif %}
+            {% else %}
+                <a class="nav-link{% if request.endpoint == 'main.index' %} is-active{% endif %}" href="{{ url_for('main.index') }}"{% if request.endpoint == 'main.index' %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">⌂</span> Overview
+                </a>
+                <a class="nav-link{% if request.endpoint == 'main.login' %} is-active{% endif %}" href="{{ url_for('main.login') }}"{% if request.endpoint == 'main.login' %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">→</span> Login
+                </a>
+                <a class="nav-link{% if request.endpoint == 'main.register' %} is-active{% endif %}" href="{{ url_for('main.register') }}"{% if request.endpoint == 'main.register' %} aria-current="page"{% endif %}>
+                    <span aria-hidden="true">＋</span> Register
+                </a>
+            {% endif %}
+        </nav>
+
+        {% if nav_user %}
+            <div class="sidebar__footer">
+                <div class="user-chip">
+                    <span class="user-chip__avatar" aria-hidden="true">{{ nav_user["username"][0]|upper }}</span>
+                    <span>
+                        <strong>{{ nav_user["username"] }}</strong>
+                        <small>{{ nav_user["role"]|title }}</small>
+                    </span>
+                </div>
+                <form method="post" action="{{ url_for('main.logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button class="nav-link nav-link--button" type="submit">
+                        <span aria-hidden="true">↪</span> Logout
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <p class="sidebar__note">Use fictional data only. Keep all testing inside this local lab.</p>
+        {% endif %}
+    </aside>
+
+    <label class="sidebar-backdrop" for="sidebar-toggle" aria-hidden="true"></label>
+
+    <div class="app-shell">
+        <header class="mobile-header">
+            <label class="menu-button" for="sidebar-toggle" aria-label="Open navigation">
+                <span aria-hidden="true">☰</span>
+            </label>
+            <a class="mobile-brand" href="{{ url_for('main.index') }}">BurpLab CTF</a>
+            <span class="mobile-status" aria-label="Local lab online"></span>
+        </header>
+
+        <main class="main-content" id="main-content" tabindex="-1">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-stack" aria-label="Messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-message--{{ category }}" data-category="{{ category }}" role="status">
+                                <span aria-hidden="true">{% if category == 'success' %}✓{% elif category in ('error', 'danger') %}!{% else %}i{% endif %}</span>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

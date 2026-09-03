@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}{{ challenge["title"] }} — BurpLab CTF{% endblock %}
+
+{% block content %}
+    <a class="back-link" href="{{ url_for('main.challenges') }}">← Back to challenges</a>
+
+    <div class="challenge-layout">
+        <div class="challenge-main">
+            <section class="panel challenge-intro">
+                <div class="challenge-intro__meta">
+                    <span class="badge difficulty--{{ challenge['difficulty']|lower }}">{{ challenge["difficulty"]|title }}</span>
+                    {% if challenge["id"] != 13 %}
+                        <span class="badge">{{ challenge["category"]|title }}</span>
+                    {% endif %}
+                    <span class="badge">{{ challenge["points"] }} points</span>
+                    {% if completed %}
+                        <span class="badge badge--success challenge-status--solved"><span aria-hidden="true">✓</span> Completed</span>
+                    {% else %}
+                        <span class="badge">Not completed</span>
+                    {% endif %}
+                </div>
+                <h1>{{ challenge["title"] }}</h1>
+                <p class="challenge-description">{{ challenge["description"] }}</p>
+            </section>
+
+            {% if challenge["id"] == 13 %}
+                <script src="{{ url_for('static', filename='js/capstone-audit.js') }}" defer></script>
+            {% else %}
+                <section class="panel lab-action" aria-labelledby="lab-heading">
+                    <div class="panel__header">
+                        <h2 id="lab-heading">Application</h2>
+                        <span class="badge">Lab target</span>
+                    </div>
+                    {% if challenge["id"] == 1 %}
+                        <p>Send the training request, then inspect its full response in Burp Proxy.</p>
+                        <a class="button button--secondary" href="{{ url_for('main.first_request_lab') }}">Send training request</a>
+                    {% elif challenge["id"] == 2 %}
+                        <p>Load the public message, then compare it with the captured raw response.</p>
+                        <button id="response-reader" type="button" data-endpoint="{{ url_for('main.read_response_lab_data') }}">Load response</button>
+                        <p class="lab-output" id="response-reader-output" aria-live="polite">No response loaded.</p>
+                        <script src="{{ url_for('static', filename='js/read-response.js') }}" defer></script>
+                    {% elif challenge["id"] == 3 %}
+                        <p>Capture this starter request, send it to Repeater, and vary only its permitted id value.</p>
+                        <a class="button button--secondary" href="{{ url_for('main.repeater_lab', id=1) }}">Open product lookup with id=1</a>
+                    {% elif challenge["id"] == 4 %}
+                        <p>Capture the starter request and vary its id within the documented fictional range 1–50.</p>
+                        <a class="button button--secondary" href="{{ url_for('main.repeater_lab', id=1) }}">Open bounded product lookup with id=1</a>
+                    {% elif challenge["id"] == 5 %}
+                        <p>Issue a random challenge-only session cookie, inspect it, then supply its value to the related check request.</p>
+                        <div class="form-actions">
+                            <a class="button button--secondary" href="{{ url_for('main.cookies_lab_start') }}">Issue challenge session cookie</a>
+                            <a class="button button--secondary" href="{{ url_for('main.cookies_lab_check', session_value='VALUE') }}">Open related check request</a>
+                        </div>
+                    {% elif challenge["id"] == 6 %}
+                        <p>Send the starter request to Repeater and add the documented challenge-specific debug header.</p>
+                        <a class="button button--secondary" href="{{ url_for('main.headers_lab') }}">Open header lab request</a>
+                    {% elif challenge["id"] == 7 %}
+                        <p>Use the navigation Logout control, begin recording Proxy HTTP history, and inspect every response while logging in again.</p>
+                    {% elif challenge["id"] == 8 %}
+                        <p>This isolated lab assumes the fictional identity alice. Capture her starter order and vary only its nearby order ID.</p>
+                        <a class="button button--secondary" href="{{ url_for('main.challenge_order', order_id=7001) }}">Open alice's fictional order 7001</a>
+                    {% elif challenge["id"] == 9 %}
+                        <p>Reload the dashboard while recording Proxy HTTP history, then investigate background API traffic that is not rendered or linked.</p>
+                        <a class="button button--secondary" href="{{ url_for('main.dashboard') }}">Return to dashboard</a>
+                    {% elif challenge["id"] == 10 %}
+                        <p>Send the normal fictional profile update, capture its JSON request, and test an additional property in Repeater.</p>
+                        <button id="lab-profile-update" type="button" data-endpoint="{{ url_for('api.update_lab_profile') }}">Send fictional profile update</button>
+                        <p class="lab-output" id="lab-profile-output" aria-live="polite">No lab profile update sent.</p>
+                        <script src="{{ url_for('static', filename='js/json-manipulation.js') }}" defer></script>
+                    {% elif challenge["id"] == 11 %}
+                        <p>The retired service has no visible link. Inspect the supporting assets loaded by this page and explore what they reference.</p>
+                        <script src="{{ url_for('static', filename='js/legacy-lab-reference.js') }}" defer></script>
+                    {% elif challenge["id"] == 12 %}
+                        <p>Capture the starter record request, change its numeric record parameter in Repeater, then follow the handoff in the interesting response.</p>
+                        <a class="button button--secondary" href="{{ url_for('main.chain_lab_start', record=1) }}">Open starter record 1</a>
+                    {% endif %}
+                </section>
+            {% endif %}
+
+            {% if hints_available %}
+                <section class="panel" aria-labelledby="hints-heading">
+                    <div class="panel__header">
+                        <h2 id="hints-heading">Hints</h2>
+                        <span class="badge badge--warning">{{ hint_count }} / 3 revealed</span>
+                    </div>
+                    <ol class="hint-list">
+                        {% for hint_number in range(1, 4) %}
+                            <li>
+                                {% if hint_number <= hint_count %}
+                                    <strong>Hint {{ hint_number }}:</strong>
+                                    {{ revealed_hints[hint_number - 1] }}
+                                {% elif not completed and hint_number == hint_count + 1 %}
+                                    <form
+                                        method="post"
+                                        action="{{ url_for(
+                                            'main.reveal_challenge_hint',
+                                            challenge_id=challenge['id'],
+                                            hint_number=hint_number
+                                        ) }}"
+                                    >
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button type="submit">Reveal hint {{ hint_number }}</button>
+                                    </form>
+                                {% else %}
+                                    <button type="button" disabled>Hint {{ hint_number }} {% if completed %}not revealed{% else %}locked{% endif %}</button>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </section>
+            {% endif %}
+        </div>
+
+        <aside class="inspector-panel" aria-labelledby="submit-heading">
+            <div class="inspector-panel__bar">
+                <span>Flag inspector</span>
+                <span>POST</span>
+            </div>
+            <div class="inspector-panel__body">
+                <p class="inspector-panel__label">Validation endpoint</p>
+                <h2 id="submit-heading">Submit Flag</h2>
+                {% if completed %}
+                    <p class="inspector-panel__completed challenge-status--solved"><span aria-hidden="true">✓</span> This challenge is already complete.</p>
+                {% else %}
+                    <form class="form-grid" method="post" action="{{ url_for('main.submit_challenge', challenge_id=challenge['id']) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <div class="field">
+                            <label for="flag">Flag</label>
+                            <input id="flag" name="flag" type="text" autocomplete="off" placeholder="Paste discovered flag" required>
+                            <p class="field-help">Flags are validated server-side.</p>
+                        </div>
+                        <button type="submit">Submit flag</button>
+                    </form>
+                {% endif %}
+            </div>
+        </aside>
+    </div>
+{% endblock %}

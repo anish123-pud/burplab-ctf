@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Products — BurpLab CTF{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        <div>
+            <p class="page-kicker">Fictional storefront</p>
+            <h1>Products</h1>
+            <p>Browse the normal application data used throughout this local training lab.</p>
+        </div>
+    </header>
+
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+                <article class="product-card">
+                    <span class="badge">Product {{ "%02d"|format(product["id"]) }}</span>
+                    <h2>
+                        <a href="{{ url_for('main.product', product_id=product['id']) }}">
+                            {{ product["name"] }}
+                        </a>
+                    </h2>
+                    <p class="product-card__description">{{ product["description"] }}</p>
+                    <div class="product-card__footer">
+                        <span class="price-value">${{ "%.2f"|format(product["price"]) }}</span>
+                        <span class="inventory">{{ product["stock"] }} in stock</span>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state"><p>No products are available.</p></div>
+    {% endif %}
+{% endblock %}

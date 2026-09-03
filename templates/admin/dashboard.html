@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — BurpLab CTF{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        <div>
+            <p class="page-kicker">Instructor controls</p>
+            <h1>Admin Dashboard</h1>
+            <p>Read-only student progress and scoring overview.</p>
+        </div>
+        <a class="button button--secondary" href="{{ url_for('admin.reset') }}">Review reset confirmation</a>
+    </header>
+
+    <section class="panel" aria-labelledby="students-heading">
+        <div class="panel__header">
+            <h2 id="students-heading">Students</h2>
+            <span class="badge">{{ students|length }} accounts</span>
+        </div>
+        {% if students %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Username</th>
+                            <th scope="col">Display name</th>
+                            <th scope="col">Progress</th>
+                            <th scope="col">Submissions</th>
+                            <th scope="col">Hints used</th>
+                            <th scope="col">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                            <tr>
+                                <td>{{ student["username"] }}</td>
+                                <td>{{ student["display_name"] }}</td>
+                                <td>{{ student["completed_challenges"] }} / {{ student["total_challenges"] }}</td>
+                                <td>{{ student["submissions"] }}</td>
+                                <td>{{ student["hints_used"] }}</td>
+                                <td><span class="score-value">{{ student["score"] }}</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state"><p>No student accounts are available.</p></div>
+        {% endif %}
+    </section>
+
+    <section class="panel" aria-labelledby="progress-heading">
+        <div class="panel__header">
+            <h2 id="progress-heading">Per-student Challenge Progress</h2>
+            <span class="badge">Detailed view</span>
+        </div>
+        {% for student in students %}
+            <details>
+                <summary>
+                    {{ student["username"] }} —
+                    {{ student["completed_challenges"] }} /
+                    {{ student["total_challenges"] }} completed
+                </summary>
+                <div class="details-body">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Challenge</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Attempts</th>
+                                    <th scope="col">Hints used</th>
+                                    <th scope="col">Score</th>
+                                    <th scope="col">Completed at</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for progress in student["progress"] %}
+                                    <tr>
+                                        <td>{{ progress["challenge_id"] }}. {{ progress["challenge_title"] }}</td>
+                                        <td>{{ progress["status"] }}</td>
+                                        <td>{{ progress["attempts"] }}</td>
+                                        <td>{{ progress["hints_used"] }}</td>
+                                        <td>{{ progress["points_awarded"] }}</td>
+                                        <td>{{ progress["completed_at"] or "—" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </details>
+        {% endfor %}
+    </section>
+
+    <section class="panel" aria-labelledby="submissions-heading">
+        <div class="panel__header">
+            <h2 id="submissions-heading">Submission Activity</h2>
+            <span class="badge">{{ submissions|length }} records</span>
+        </div>
+        {% if submissions %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Student</th>
+                            <th scope="col">Challenge</th>
+                            <th scope="col">Result</th>
+                            <th scope="col">Attempts</th>
+                            <th scope="col">Hints used</th>
+                            <th scope="col">Points awarded</th>
+                            <th scope="col">Last submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for submission in submissions %}
+                            <tr>
+                                <td>{{ submission["username"] }}</td>
+                                <td>{{ submission["challenge_id"] }}. {{ submission["challenge_title"] }}</td>
+                                <td>{{ submission["status"] }}</td>
+                                <td>{{ submission["attempts"] }}</td>
+                                <td>{{ submission["hints_used"] }}</td>
+                                <td>{{ submission["points_awarded"] }}</td>
+                                <td>{{ submission["last_attempt_at"] or "—" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state"><p>No challenge submissions have been recorded.</p></div>
+        {% endif %}
+    </section>
+
+    <section class="panel danger-zone" aria-labelledby="reset-heading">
+        <div class="panel__header"><h2 id="reset-heading">Reset Lab</h2></div>
+        <p class="text-muted">Restore all lab data to its original fictional seed state.</p>
+        <a href="{{ url_for('admin.reset') }}">Review reset confirmation →</a>
+    </section>
+{% endblock %}

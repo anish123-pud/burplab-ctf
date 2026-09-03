@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Orders — BurpLab CTF{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        <div>
+            <p class="page-kicker">Account records</p>
+            <h1>Your Orders</h1>
+            <p>Order history scoped to your authenticated student account.</p>
+        </div>
+    </header>
+
+    {% if orders %}
+        <div class="order-list">
+            {% for order in orders %}
+                <article class="order-card">
+                    <header class="order-card__header">
+                        <div>
+                            <h2>Order #{{ order["id"] }}</h2>
+                            <p>Placed: {{ order["created_at"] }}</p>
+                        </div>
+                        <span class="badge{% if order['status']|lower in ('completed', 'delivered') %} badge--success{% else %} badge--warning{% endif %}">
+                            {{ order["status"]|title }}
+                        </span>
+                    </header>
+                    <div class="order-card__body">
+                        <div class="order-summary">
+                            <div>
+                                <span>Status</span>
+                                <strong>{{ order["status"]|title }}</strong>
+                            </div>
+                            <div>
+                                <span>Total</span>
+                                <strong>${{ "%.2f"|format(order["total_amount"]) }}</strong>
+                            </div>
+                        </div>
+                        {% if order["items"] %}
+                            <h3>Items</h3>
+                            <ul class="item-list">
+                                {% for item in order["items"] %}
+                                    <li>
+                                        <a href="{{ url_for('main.product', product_id=item['product_id']) }}">
+                                            {{ item["product_name"] }}
+                                        </a>
+                                        <span>{{ item["quantity"] }} × ${{ "%.2f"|format(item["unit_price"]) }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">This order has no items.</p>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state"><p>You have no orders.</p></div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Challenges — BurpLab CTF{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        <div>
+            <p class="page-kicker">Challenge library</p>
+            <h1>Challenges</h1>
+            <p>Capture traffic, inspect the full exchange, and submit each discovered flag.</p>
+        </div>
+    </header>
+
+    {% if challenges %}
+        <div class="challenge-grid">
+            {% for challenge in challenges %}
+                <article class="challenge-card{% if challenge['completed'] %} challenge-card--solved{% endif %}">
+                    <div class="challenge-card__topline">
+                        <span class="challenge-card__number">Challenge {{ "%02d"|format(challenge["id"]) }}</span>
+                        {% if challenge["completed"] %}
+                            <span class="badge badge--success challenge-status--solved"><span aria-hidden="true">✓</span> Solved</span>
+                        {% else %}
+                            <span class="badge">Unsolved</span>
+                        {% endif %}
+                    </div>
+                    <h2>
+                        <a href="{{ url_for('main.challenge', challenge_id=challenge['id']) }}">
+                            {{ challenge["title"] }}
+                        </a>
+                    </h2>
+                    <p class="challenge-card__description">{{ challenge["description"] }}</p>
+                    <div class="challenge-card__footer">
+                        <div class="challenge-card__meta">
+                            {% if challenge["id"] != 13 %}
+                                <span class="badge">{{ challenge["category"]|title }}</span>
+                            {% endif %}
+                            <span class="badge difficulty--{{ challenge['difficulty']|lower }}">{{ challenge["difficulty"]|title }}</span>
+                        </div>
+                        <span class="points-value">{{ challenge["points"] }} pts</span>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No challenges are available.</p>
+        </div>
+    {% endif %}
+{% endblock %}
