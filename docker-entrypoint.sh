@@ -1,10 +1,9 @@
 #!/bin/sh
 set -eu
 
-if [ ! -f /app/database/burplab.db ]; then
-    echo "No BurpLab database found; initializing fictional seed data."
-    python /app/scripts/init_db.py
-fi
+# An existing SQLite file may still be completely empty. Inspect the schema
+# before every start and initialize only when its users-table sentinel is absent.
+python /app/scripts/init_db.py --if-needed
 
 # Docker port publishing cannot reach a process bound to the container's
 # loopback interface. In default local-only mode, Flask still binds to

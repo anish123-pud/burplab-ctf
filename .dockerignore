@@ -17,6 +17,12 @@ __pycache__
 *.db-journal
 *.sqlite-journal
 *.sqlite3-journal
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/*.db-journal
+**/*.sqlite-journal
+**/*.sqlite3-journal
 .coverage
 htmlcov
 .idea

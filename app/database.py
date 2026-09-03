@@ -236,6 +236,19 @@ def seed_db(database_path: str | Path = DATABASE_PATH) -> None:
         connection.executescript(SEED_PATH.read_text(encoding="utf-8"))
 
 
+def has_users_table(database_path: str | Path = DATABASE_PATH) -> bool:
+    """Return whether the database contains the schema's sentinel table."""
+    path = Path(database_path)
+    if not path.is_file():
+        return False
+
+    with closing(get_connection(path)) as connection:
+        users_table = connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'users'"
+        ).fetchone()
+    return users_table is not None
+
+
 def recreate_db(database_path: str | Path = DATABASE_PATH) -> Path:
     """Remove an existing database, then initialize and seed a fresh one."""
     path = Path(database_path)
@@ -243,3 +256,18 @@ def recreate_db(database_path: str | Path = DATABASE_PATH) -> Path:
     init_db(path)
     seed_db(path)
     return path
+
+
+def initialize_db_if_needed(database_path: str | Path = DATABASE_PATH) -> bool:
+    """Initialize and seed only when the users table is missing.
+
+    The database file alone is not a reliable initialization marker because
+    SQLite creates it when an application opens a connection. The users table
+    is part of every valid BurpLab schema, so it is used as the sentinel.
+    """
+    path = Path(database_path)
+    if has_users_table(path):
+        return False
+
+    recreate_db(path)
+    return True

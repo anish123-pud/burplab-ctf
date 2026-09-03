@@ -55,9 +55,10 @@ docker compose down
 ```
 
 The database is stored in the named `burplab_database` volume, so
-`docker compose down` does not erase student progress. If the database file is
-absent, the container entrypoint recreates it from `database/schema.sql` and
-`database/seed.sql` before starting Flask.
+`docker compose down` does not erase student progress. Before starting Flask,
+the container entrypoint checks for the `users` table. It initializes and seeds
+from `database/schema.sql` and `database/seed.sql` only when that table is
+missing, so an existing populated database is preserved across restarts.
 
 ### Deliberate classroom LAN access
 
